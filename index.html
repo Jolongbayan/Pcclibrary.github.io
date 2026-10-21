@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pasig Catholic Library | Login</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="login-container">
+
+        <section class="illustration">
+            <div class="illustration-overlay">
+                <p>Discover. Read. Imagine.</p>
+            </div>
+        </section>
+
+        <section class="login-panel">
+
+            <div class="logos">
+                <img
+                    src="pasig-logo.png.png"
+                    alt="Pasig Catholic School Logo"
+                    class="school-logo"
+                >
+
+                <span class="library-name">
+                    Pasig Catholic Library
+                </span>
+
+                <img
+                    src="library-logo.png.png"
+                    alt="PCC Library Logo"
+                    class="library-logo"
+                >
+            </div>
+
+            <div class="welcome">
+                <h1 id="welcome-title">Welcome!</h1>
+
+                <p>
+                    Don't have an account?
+                    <a href="#" id="create-account">
+                        Create a new account
+                    </a>
+                </p>
+            </div>
+
+            <form id="login-form">
+
+                <div class="form-group">
+                    <label for="email">Enter your email:</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder=""
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password:</label>
+
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            autocomplete="current-password"
+                            minlength="6"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            id="toggle-password"
+                            class="password-toggle"
+                            aria-label="Show password"
+                        >
+                            Show
+                        </button>
+                    </div>
+                </div>
+
+                <p
+                    id="message"
+                    class="message"
+                    role="status"
+                    aria-live="polite"
+                ></p>
+
+                <button type="submit" class="login-button">
+                    LOGIN
+                </button>
+
+            </form>
+
+            <p class="footer-text">
+                Your gateway to knowledge and discovery.
+            </p>
+
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

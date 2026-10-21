@@ -1,0 +1,368 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --green-dark: #00180f;
+    --green-main: #263b32;
+    --green-button: #159d25;
+    --white: #f5f5f5;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: linear-gradient(
+        135deg,
+        #25483b 0%,
+        #62746b 50%,
+        #a0a0a0 100%
+    );
+}
+
+.login-container {
+    display: grid;
+    grid-template-columns: 60% 40%;
+
+    width: 100%;
+    max-width: 1250px;
+    min-height: 568px;
+
+    overflow: hidden;
+
+    background: #263b32;
+
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+}
+
+/* LEFT FOREST ILLUSTRATION */
+.illustration {
+    position: relative;
+    min-height: 568px;
+
+    background-image: url("forest-library.jpg.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.illustration-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    width: 100%;
+    padding: 25px 15px;
+
+    text-align: center;
+
+    background: linear-gradient(
+        transparent,
+        rgba(0, 0, 0, 0.45)
+    );
+}
+
+.illustration-overlay p {
+    color: #f6e8bb;
+    font-family: Georgia, serif;
+    font-size: 17px;
+    letter-spacing: 1px;
+}
+
+/* RIGHT LOGIN PANEL */
+.login-panel {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+    padding: 30px 32px 24px;
+
+    color: var(--white);
+
+    background: linear-gradient(
+        180deg,
+        #00180f 0%,
+        #263b32 48%,
+        #858585 100%
+    );
+}
+
+/* SCHOOL AND LIBRARY LOGOS */
+.logos {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+    min-height: 76px;
+    margin-bottom: 30px;
+}
+
+.school-logo,
+.library-logo {
+    width: 66px;
+    height: 66px;
+
+    object-fit: contain;
+}
+
+.library-name {
+    flex: 1;
+
+    text-align: center;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+/* WELCOME HEADING */
+.welcome {
+    margin-bottom: 24px;
+}
+
+.welcome h1 {
+    margin-bottom: 3px;
+
+    font-size: 27px;
+    font-weight: 400;
+}
+
+.welcome p {
+    color: #c7cec9;
+    font-size: 11px;
+}
+
+.welcome a {
+    color: #f5f5f5;
+
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.welcome a:hover {
+    color: #b7ffbd;
+}
+
+.login-panel form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+
+.form-group {
+    margin-bottom: 26px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+
+    color: #eeeeee;
+    font-size: 11px;
+}
+
+.form-group input {
+    width: 100%;
+    height: 35px;
+    padding: 8px 10px;
+
+    border: 1px solid #080d0a;
+    border-radius: 0;
+    outline: none;
+
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.08);
+
+    font-size: 14px;
+
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #55c85f;
+
+    box-shadow: 0 0 0 2px rgba(85, 200, 95, 0.2);
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-right: 55px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+
+    transform: translateY(-50%);
+
+    padding: 3px;
+    border: none;
+
+    color: #eeeeee;
+    background: transparent;
+
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.message {
+    min-height: 20px;
+    margin-bottom: 8px;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.message.error {
+    color: #ffd0d0;
+}
+
+.message.success {
+    color: #c6ffc9;
+}
+
+.login-button {
+    width: 100%;
+    min-height: 68px;
+
+    margin-top: auto;
+
+    border: none;
+    border-radius: 40px;
+
+    color: #000000;
+
+    background: linear-gradient(
+        100deg,
+        #159d25 0%,
+        #7caa85 58%,
+        #b0b0b0 100%
+    );
+
+    font-size: 22px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.login-button:hover {
+    filter: brightness(1.08);
+    transform: translateY(-2px);
+}
+
+.login-button:active {
+    transform: scale(0.98);
+}
+
+
+.login-button:focus-visible,
+.password-toggle:focus-visible {
+    outline: 2px solid #b7ffbd;
+    outline-offset: 4px;
+}
+
+.footer-text {
+    margin-top: 20px;
+
+    text-align: center;
+    color: #e0e0e0;
+    font-size: 10px;
+}
+
+@media (max-width: 850px) {
+    body {
+        padding: 20px;
+    }
+
+    .login-container {
+        grid-template-columns: 48% 52%;
+        min-height: 520px;
+    }
+
+    .illustration {
+        min-height: 520px;
+    }
+
+    .login-panel {
+        padding: 25px 24px;
+    }
+
+    .logos {
+        gap: 7px;
+    }
+
+    .school-logo,
+    .library-logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .library-name {
+        font-size: 10px;
+        white-space: normal;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 14px;
+    }
+
+    .login-container {
+        grid-template-columns: 1fr;
+
+        max-width: 430px;
+        min-height: auto;
+
+        border-radius: 12px;
+    }
+
+    .illustration {
+        min-height: 220px;
+        background-position: center 52%;
+    }
+
+    .illustration-overlay {
+        padding: 18px 12px;
+    }
+
+    .login-panel {
+        min-height: 470px;
+        padding: 25px 24px;
+    }
+
+    .logos {
+        margin-bottom: 25px;
+    }
+
+    .welcome h1 {
+        font-size: 26px;
+    }
+
+    .login-button {
+        min-height: 58px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+    }
+}

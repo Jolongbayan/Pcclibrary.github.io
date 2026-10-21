@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCC Library Book Borrowing System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f7f4ed;
+            --card-bg: #efece4;
+            --sage-bg: #e4eae2;
+            --accent-rust: #b35432;
+            --text-main: #2c2a29;
+            --text-muted: #6b6764;
+            --border-color: #e3ded6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.5; }
+        a { text-decoration: none; color: inherit; }
+        
+        header { border-bottom: 1px solid var(--border-color); padding: 20px 40px; }
+        .nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 24px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .search-bar { flex: 0 0 400px; background: #eee9df; padding: 10px 16px; border-radius: 4px; display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 14px; }
+        .user-actions { display: flex; gap: 20px; font-size: 14px; align-items: center; }
+        .user-actions a { cursor: pointer; }
+        .user-profile-badge { display: flex; align-items: center; gap: 8px; cursor: pointer; background: #eee9df; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border-color); }
+        .user-profile-badge img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+
+        .nav-links { display: flex; gap: 30px; font-size: 14px; color: var(--text-muted); }
+        .nav-links a:hover, .nav-links a.active { color: var(--text-main); font-weight: 500; cursor: pointer; }
+
+        .section { padding: 50px 40px; max-width: 1300px; margin: 0 auto; }
+        .subtitle { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-rust); margin-bottom: 8px; font-weight: 600; }
+        .title-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
+        h1 { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 400; }
+        .action-link { font-size: 14px; color: var(--text-main); border-bottom: 1px solid var(--text-main); padding-bottom: 2px; cursor: pointer; background: none; border: none; }
+
+        .view { display: none; }
+        .view.active { display: block; }
+        .back-btn { font-size: 28px; cursor: pointer; display: inline-block; margin-bottom: 15px; user-select: none; }
+        .cover-img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+        .books-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        .book-card { background: var(--card-bg); border-radius: 6px; padding: 20px; display: flex; flex-direction: column; position: relative; transition: transform 0.2s; }
+        .book-card:hover { transform: translateY(-4px); }
+        .bookmark-btn { position: absolute; top: 16px; right: 16px; background: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 10; }
+        .bookmark-btn.active svg { fill: var(--accent-rust); stroke: var(--accent-rust); }
+        .book-cover { height: 270px; margin-bottom: 16px; border-radius: 4px; overflow: hidden; box-shadow: 0 8px 16px rgba(0,0,0,0.12); display: flex; justify-content: center; align-items: center; }
+        .book-cover svg { width: 100%; height: 100%; }
+        .book-meta { font-size: 10px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 4px; }
+        .book-title { font-family: 'Playfair Display', serif; font-size: 19px; margin-bottom: 2px; }
+        .book-author { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; flex-grow: 1; text-transform: uppercase; letter-spacing: 0.5px; }
+        .price-row { display: flex; justify-content: flex-end; align-items: center; margin-top: auto; }
+        .add-to-bag-btn { background: none; border: none; color: var(--accent-rust); font-weight: 600; font-size: 12px; cursor: pointer; }
+        .genres-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+        .genre-card { background: var(--card-bg); padding: 24px; border-radius: 6px; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between; }
+        .genre-card h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; }
+        .genre-card p { font-size: 12px; color: var(--text-muted); }
+        
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-overlay.active { display: flex; }
+        
+        /* Modal Card Standard */
+        .borrow-form-card {
+            background-color: var(--bg-color);
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 750px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+        }
+        .borrow-form-card h2 {
+            background-color: rgba(212, 88, 31, 0.2);
+            padding: 10px 15px;
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: var(--text-main);
+        }
+        .borrow-form-card label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            margin-top: 10px;
+            margin-bottom: 4px;
+        }
+        .borrow-form-card input, .borrow-form-card select {
+            width: 320px;
+            height: 38px;
+            font-size: 14px;
+            padding: 0 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background: #fff;
+        }
+        .borrow-form-card button.submit-btn {
+            width: 160px;
+            height: 40px;
+            font-size: 15px;
+            background-color: var(--accent-rust);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+        .borrow-form-card button.submit-btn:hover {
+            opacity: 0.9;
+        }
+        .close-modal-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            border: none;
+            background: none;
+        }
+        .right-image {
+            position: absolute;
+            right: 40px;
+            top: 80px;
+            width: 230px;
+            pointer-events: none;
+        }
+
+        /* Profile Modal Extensions */
+        .profile-modal-card {
+            max-width: 550px;
+        }
+        .avatar-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-rust);
+            background: #e1dcd3;
+        }
+        .btn-logout {
+            background-color: #8b0000 !important;
+            margin-left: 10px;
+        }
+
+        .record-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--card-bg);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .record-table th, .record-table td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+        .record-table th {
+            background-color: #e5ded2;
+            font-weight: 600;
+        }
+        .badge {
+            background: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .newsletter-section { background-color: var(--sage-bg); }
+        .newsletter-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+        .newsletter-form { display: flex; gap: 10px; }
+        .newsletter-form input { flex: 1; padding: 12px 16px; border: 1px solid var(--border-color); background: white; border-radius: 4px; outline: none; }
+        .newsletter-form button { background: var(--accent-rust); color: white; border: none; padding: 12px 24px; border-radius: 4px; font-weight: 500; cursor: pointer; }
+
+        #toast { position: fixed; bottom: 20px; right: 20px; background: #2c2a29; color: white; padding: 12px 24px; border-radius: 4px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 3000; }
+        #toast.show { opacity: 1; }
+
+        @media(max-width: 1024px) {
+            .books-grid { grid-template-columns: repeat(2, 1fr); }
+            .genres-grid { grid-template-columns: repeat(3, 1fr); }
+            .right-image { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        // AUTHENTICATION GUARD
+        const SESSION_KEY = "pasigLibraryDemoUser";
+        const ACCOUNTS_KEY = "pasigLibraryDemoAccounts";
+
+        let sessionUser = null;
+        try {
+            sessionUser = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null");
+        } catch (e) {}
+
+        if (!sessionUser || sessionUser.role === "admin") {
+            window.location.replace("index.html");
+        }
+    </script>
+
+    <header>
+        <div class="nav-top">
+            <div class="logo" onclick="showView('home-view')">📖 Pcc Library</div>
+            <div class="search-bar">
+                🔍 Search books, authors, and more
+            </div>
+            <div class="user-actions">
+                <div class="user-profile-badge" onclick="openProfileModal()">
+                    <img id="nav-user-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User Avatar">
+                    <span id="nav-user-name">Student Account</span>
+                </div>
+                <a onclick="showView('record-view')"><strong>Record</strong></a>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="#" class="active" onclick="showView('home-view')">All books</a>
+            <a href="#">New & noteworthy</a>
+            <a href="#">Bestsellers</a>
+            <a href="#" onclick="showView('explore-view')">Our picks</a>
+            <a href="#">Genres</a>
+            <a href="#">Gifts & stationery</a>
+        </nav>
+    </header>
+
+    <!-- VIEW 1: HOME -->
+    <div id="home-view" class="view active">
+        <section class="section">
+            <div class="subtitle">The books we can't stop talking about</div>
+            <div class="title-row">
+                <h1>Good company for your bookshelf.</h1>
+                <button class="action-link" onclick="showView('explore-view')">Shop all featured reads →</button>
+            </div>
+
+            <div class="books-grid">
+                <!-- Home Book 1 -->
+                <div class="book-card">
+                    <button class="bookmark-btn" onclick="toggleBookmark(this)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                    <div class="book-cover">
+                        <img src="https://tse2.mm.bing.net/th/id/OIP.2Z33m9wvWeAQjvQS5USiGQHaHa?r=0&pid=Api&h=220&P=0" alt="The Art of Paying Attention Cover" class="cover-img">
+                    </div>
+                    <div class="book-meta">Essays · Hardcover</div>
+                    <div class="book-title">The Art of Paying Attention</div>
+                    <div class="book-author">Elena Hart</div>
+                    <button class="add-to-bag-btn" style="text-align: left;" onclick="openBorrowModal('The Art of Paying Attention')">Borrow +</button>
+                </div>
+
+                <!-- Home Book 2 -->
+                <div class="book-card">
+                    <button class="bookmark-btn" onclick="toggleBookmark(this)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                    <div class="book-cover">
+                        <img src="https://tse1.mm.bing.net/th/id/OIP.yDSQP_SRiCds-egsHm2jCAHaEo?r=0&pid=Api&h=220&P=0" alt="Where the Sea Begins Cover" class="cover-img">
+                    </div>
+                    <div class="book-meta">Fiction · Paperback</div>
+                    <div class="book-title">Where the Sea Begins</div>
+                    <div class="book-author">Clara Whitmore</div>
+                    <button class="add-to-bag-btn" style="text-align: left;" onclick="openBorrowModal('Where the Sea Begins')">Borrow +</button>
+                </div>
+
+                <!-- Home Book 3 -->
+                <div class="book-card">
+                    <button class="bookmark-btn" onclick="toggleBookmark(this)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                    <div class="book-cover">
+                        <img src="https://tse1.mm.bing.net/th/id/OIP.vywLVXiLs5Ahvid4njUFfAHaLH?r=0&pid=Api&h=220&P=0" alt="A Garden of Small Things Cover" class="cover-img">
+                    </div>
+                    <div class="book-meta">Nature · Hardcover</div>
+                    <div class="book-title">A Garden of Small Things</div>
+                    <div class="book-author">Oliver Reed</div>
+                    <button class="add-to-bag-btn" style="text-align: left;" onclick="openBorrowModal('A Garden of Small Things')">Borrow +</button>
+                </div>
+
+                <!-- Home Book 4 -->
+                <div class="book-card">
+                    <button class="bookmark-btn" onclick="toggleBookmark(this)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                    <div class="book-cover">
+                        <img src="https://tse3.mm.bing.net/th/id/OIP.ZK4eJPQeaB8qhyCGmiA0oAHaHa?r=0&pid=Api&h=220&P=0" alt="The City After Rain Cover" class="cover-img">
+                    </div>
+                    <div class="book-meta">Fiction · Paperback</div>
+                    <div class="book-title">The City After Rain</div>
+                    <div class="book-author">Maya Ellis</div>
+                    <button class="add-to-bag-btn" style="text-align: left;" onclick="openBorrowModal('The City After Rain')">Borrow +</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Genres Section -->
+        <section class="section">
+            <div class="subtitle">Follow your curiosity</div>
+            <div class="title-row" style="margin-bottom: 24px;">
+                <h1>Which shelf is calling?</h1>
+                <a href="#" class="action-link">Explore all genres →</a>
+            </div>
+            <div class="genres-grid">
+                <div class="genre-card"><h3>Fiction</h3><p>Other lives. New worlds.</p></div>
+                <div class="genre-card"><h3>Nonfiction</h3><p>A little more understanding.</p></div>
+                <div class="genre-card"><h3>Poetry</h3><p>Small words. Big feelings.</p></div>
+                <div class="genre-card"><h3>Art & design</h3><p>A different way of seeing.</p></div>
+                <div class="genre-card"><h3>Food & living</h3><p>For the everyday rituals.</p></div>
+                <div class="genre-card"><h3>Young readers</h3><p>Wonder starts here.</p></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- VIEW 2: EXPLORE NEW BOOKS -->
+    <div id="explore-view" class="view">
+        <section class="section">
+            <div class="back-btn" onclick="showView('home-view')">←</div>
+            <h1 style="margin-bottom: 30px;">Explore New Books</h1>
+
+            <div class="books-grid">
+                <!-- Book 1 -->
+                <div class="book-card" style="background-color: #e8e3d8;">
+                    <button class="bookmark-btn" onclick="toggleBookmark(this)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                    <div class="book-cover">
+                        <img src="https://tse4.mm.bing.net/th/id/OIP.r5PBtBzWpQvU3In_RfMfZgHaFm?r=0&pid=Api&h=220&P=0" alt="Reference Book Cover" class="cover-img">
+                    </div>
+                    <div class="book-meta">Memoir · Hardcover</div>
+                    <div class="book-title">Reference Book</div>
+                    <div class="book-author">Dwight McCabe</div>
+                    <div class="price-row">
+                        <button class="add-to-bag-btn" onclick="openBorrowModal('Reference Book')">Borrow +</button>
+                    </div>
+                </div>
+
+                <!-- Book 2 -->
+                <div class="book-card" style="background-color: #dce4d7;">
+                    <button class="bookmark-btn" onclick="toggleBookmark(this)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                    <div class="book-cover">
+                        <img src="https://cdn.kobo.com/book-images/8d423df7-5525-4db6-8e09-4a1555da0240/1200/1200/False/noli-me-tangere-comics.jpg" alt="Noli me tangere" class="cover-img">
+                    </div> 
+                    <div class="book-meta">Fiction · Hardcover</div>
+                    <div class="book-title">Noli me tangere</div>
+                    <div class="book-author">Jose Rizal</div>
+                    <div class="price-row">
+                        <button class="add-to-bag-btn" onclick="openBorrowModal('Noli me tangere')">Borrow +</button>
+                    </div>
+                </div>
+
+                <!-- Book 3 -->
+                <div class="book-card" style="background-color: #ebdcd0;">
+                    <button class="bookmark-btn" onclick="toggleBookmark(this)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                    <div class="book-cover">
+                        <img src="https://www.anvilpublishing.com/anvil2012/wp-content/uploads/2016/11/El-Filibusterismo.jpg" alt="El Filibusterismo" class="cover-img">
+                    </div> 
+                    <div class="book-meta">Food & Drink · Hardcover</div>
+                    <div class="book-title">El Filibusterismo</div>
+                    <div class="book-author">Jose Rizal</div>
+                    <div class="price-row">
+                        <button class="add-to-bag-btn" onclick="openBorrowModal('El Filibusterismo')">Borrow +</button>
+                    </div>
+                </div>
+
+                <!-- Book 4 -->
+                <div class="book-card" style="background-color: #dfd8e3;">
+                    <button class="bookmark-btn" onclick="toggleBookmark(this)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                    <div class="book-cover">
+                        <img src="https://ph-test-11.slatic.net/p/10177740278bb26f33c5c0e5b881971d.jpg" alt="Florante at Laura Cover" class="cover-img">
+                    </div> 
+                    <div class="book-meta">Poetry · Paperback</div>
+                    <div class="book-title">Florante at Laura</div>
+                    <div class="book-author">Francisco Balagtas</div>
+                    <div class="price-row">
+                        <button class="add-to-bag-btn" onclick="openBorrowModal('Florante at Laura')">Borrow +</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- VIEW 3: BORROWING RECORDS -->
+    <div id="record-view" class="view">
+        <section class="section">
+            <div class="back-btn" onclick="showView('home-view')">←</div>
+            <h1>Library Borrowing Records</h1>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">List of all saved student borrowing transactions.</p>
+            
+            <table class="record-table">
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Student Name</th>
+                        <th>Book Title</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="record-table-body">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted);">No borrow records saved yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <!-- BORROW MODAL -->
+    <div class="modal-overlay" id="borrowModal">
+        <div class="borrow-form-card">
+            <button class="close-modal-btn" onclick="closeBorrowModal()">&times;</button>
+            <img src="https://static.vecteezy.com/system/resources/previews/009/399/398/non_2x/old-vintage-book-clipart-design-illustration-free-png.png" class="right-image" alt="Library">
+            
+            <h2>Borrow a Book</h2>
+
+            <label for="studentId">Student ID</label>
+            <input type="text" id="studentId" placeholder="Enter Student ID"><br>
+
+            <label for="studentName">Student Name</label>
+            <input type="text" id="studentName" placeholder="Enter Student Name"><br>
+
+            <label for="bookTitle">Book Title</label>
+            <input type="text" id="bookTitle" placeholder="Enter Book Title"><br>
+
+            <label for="dueDate">Due Date</label>
+            <input type="date" id="dueDate"><br>
+
+            <button class="submit-btn" onclick="borrowBook()">Borrow Book</button>
+        </div>
+    </div>
+
+    <!-- USER ACCOUNT / PROFILE MODAL -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="borrow-form-card profile-modal-card">
+            <button class="close-modal-btn" onclick="closeProfileModal()">&times;</button>
+            <h2>My Student Profile</h2>
+
+            <div class="avatar-container">
+                <img id="profile-avatar-preview" class="avatar-preview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile Avatar">
+                <div>
+                    <label for="avatarUpload">Change Profile Picture</label>
+                    <input type="file" id="avatarUpload" accept="image/*" onchange="handleAvatarUpload(event)" style="width: 220px; font-size: 11px;">
+                </div>
+            </div>
+
+            <label for="profileEmail">Account Email</label>
+            <input type="email" id="profileEmail" disabled style="background-color: #e5ded2; cursor: not-allowed;"><br>
+
+            <label for="profileName">Full Name</label>
+            <input type="text" id="profileName" placeholder="e.g. Juan Dela Cruz"><br>
+
+            <label for="profileStudentId">Student ID</label>
+            <input type="text" id="profileStudentId" placeholder="e.g. 2024-00123"><br>
+
+            <label for="profileDepartment">Department / Strand</label>
+            <input type="text" id="profileDepartment" placeholder="e.g. Senior High / STEM"><br>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px;">
+                <button class="submit-btn" onclick="saveProfileDetails()">Save Changes</button>
+                <button class="submit-btn btn-logout" onclick="logoutUser()">Log Out</button>
+            </div>
+        </div>
+    </div>
+
+    <section class="section newsletter-section">
+        <div class="newsletter-container">
+            <div>
+                <div class="subtitle">A good letter is a little gift</div>
+                <h1 style="font-size: 32px; margin-bottom: 12px;">A little bookishness in your inbox.</h1>
+                <p style="font-size: 14px; color: var(--text-muted);">Our latest discoveries, reading lists, and notes from the shop. Sent thoughtfully, never too often.</p>
+            </div>
+            <div>
+                <div class="newsletter-form">
+                    <input type="email" placeholder="Your email address" id="newsletter-input">
+                    <button onclick="subscribeNewsletter()">Count me in</button>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">Just good books. No noise. Unsubscribe whenever you like.</div>
+            </div>
+        </div>
+    </section>
+
+    <div id="toast"></div>
+
+    <script>
+        const BORROW_RECORDS_KEY = "pasigLibraryBorrowRecords";
+        let currentAccount = null;
+
+        // Initialize and sync profile data
+        document.addEventListener("DOMContentLoaded", function() {
+            loadAccountData();
+            renderRecords();
+            
+            // Set default due date to 7 days from now
+            const today = new Date();
+            today.setDate(today.getDate() + 7);
+            document.getElementById('dueDate').value = today.toISOString().split('T')[0];
+        });
+
+        function loadAccountData() {
+            const accounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || "[]");
+            currentAccount = accounts.find(acc => acc.email.toLowerCase() === sessionUser.email.toLowerCase()) || {
+                email: sessionUser.email,
+                role: "student",
+                name: "Student Account",
+                studentId: "2024-0001",
+                avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+            };
+
+            const displayName = currentAccount.name || currentAccount.email.split('@')[0];
+            document.getElementById("nav-user-name").innerText = displayName;
+            
+            if (currentAccount.avatar) {
+                document.getElementById("nav-user-avatar").src = currentAccount.avatar;
+                document.getElementById("profile-avatar-preview").src = currentAccount.avatar;
+            }
+
+            document.getElementById("profileEmail").value = currentAccount.email;
+            document.getElementById("profileName").value = currentAccount.name || '';
+            document.getElementById("profileStudentId").value = currentAccount.studentId || '';
+            document.getElementById("profileDepartment").value = currentAccount.department || '';
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if (viewId === 'record-view') {
+                renderRecords();
+            }
+        }
+
+        /* Borrow Modal logic */
+        function openBorrowModal(bookTitle = '') {
+            document.getElementById('borrowModal').classList.add('active');
+            if (bookTitle) {
+                document.getElementById('bookTitle').value = bookTitle;
+            }
+            // Auto fill student information from saved account profile
+            document.getElementById("studentId").value = currentAccount.studentId || "2024-0001";
+            document.getElementById("studentName").value = currentAccount.name || sessionUser.email;
+        }
+
+        function closeBorrowModal() {
+            document.getElementById('borrowModal').classList.remove('active');
+        }
+
+        function borrowBook() {
+            var studentId = document.getElementById("studentId").value.trim(); 
+            var studentName = document.getElementById("studentName").value.trim();
+            var bookTitle = document.getElementById("bookTitle").value.trim();
+            var dueDate = document.getElementById("dueDate").value;
+
+            if (!studentId || !studentName || !bookTitle || !dueDate) {
+                alert("Please fill in all fields before borrowing.");
+                return;
+            }
+
+            var allRecords = JSON.parse(localStorage.getItem(BORROW_RECORDS_KEY) || "[]");
+            var newRecord = {
+                userEmail: sessionUser.email,
+                studentId: studentId,
+                studentName: studentName,
+                bookTitle: bookTitle,
+                dueDate: dueDate,
+                dateBorrowed: new Date().toLocaleDateString()
+            };
+
+            allRecords.push(newRecord);
+            localStorage.setItem(BORROW_RECORDS_KEY, JSON.stringify(allRecords));
+
+            document.getElementById("bookTitle").value = '';
+            closeBorrowModal();
+
+            showToast(`Saved "${bookTitle}" to Records!`);
+            renderRecords();
+        }
+
+        function renderRecords() {
+            const tbody = document.getElementById('record-table-body');
+            const allRecords = JSON.parse(localStorage.getItem(BORROW_RECORDS_KEY) || "[]");
+            
+            if (allRecords.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No borrow records saved yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = allRecords.map(record => `
+                <tr>
+                    <td><strong>${record.studentId}</strong></td>
+                    <td>${record.studentName}</td>
+                    <td>${record.bookTitle}</td>
+                    <td>${record.dueDate}</td>
+                    <td><span class="badge">Borrowed</span></td>
+                </tr>
+            `).join('');
+        }
+
+        /* Account / Profile Modal */
+        function openProfileModal() {
+            document.getElementById('profileModal').classList.add('active');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('active');
+        }
+
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Img = e.target.result;
+                    document.getElementById("profile-avatar-preview").src = base64Img;
+                    currentAccount.avatar = base64Img;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveProfileDetails() {
+            const name = document.getElementById("profileName").value.trim();
+            const studentId = document.getElementById("profileStudentId").value.trim();
+            const department = document.getElementById("profileDepartment").value.trim();
+
+            currentAccount.name = name;
+            currentAccount.studentId = studentId;
+            currentAccount.department = department;
+
+            // Save to localStorage accounts array
+            const accounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || "[]");
+            const index = accounts.findIndex(acc => acc.email.toLowerCase() === currentAccount.email.toLowerCase());
+            if (index !== -1) {
+                accounts[index] = currentAccount;
+            } else {
+                accounts.push(currentAccount);
+            }
+            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+
+            loadAccountData();
+            closeProfileModal();
+            showToast("Profile updated successfully!");
+        }
+
+        function logoutUser() {
+            sessionStorage.removeItem(SESSION_KEY);
+            window.location.replace("index.html");
+        }
+
+        function toggleBookmark(btn) {
+            btn.classList.toggle('active');
+            showToast(btn.classList.contains('active') ? "Added to your saved books!" : "Removed from saved books.");
+        }
+
+        function subscribeNewsletter() {
+            const input = document.getElementById('newsletter-input');
+            if(input.value && input.value.includes('@')) {
+                showToast("Thank you for subscribing!");
+                input.value = '';
+            } else {
+                showToast("Please enter a valid email address.");
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

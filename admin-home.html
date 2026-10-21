@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Home | Pasig Catholic Library</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { margin: 0; min-height: 100vh; background: #fff; display: block; padding: 0; }
+    .blank-page { min-height: 100vh; background: #fff; }
+  </style>
+</head>
+<body>
+  <main class="blank-page" aria-label="Admin homepage"></main>
+  <script>
+    let user = null;
+    try { user = JSON.parse(sessionStorage.getItem("pasigLibraryDemoUser") || "null"); } catch (e) {}
+    if (!user || user.role !== "admin") window.location.replace("index.html");
+  </script>
+</body>
+</html>
